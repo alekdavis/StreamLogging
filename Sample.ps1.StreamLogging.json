@@ -1,0 +1,172 @@
+{
+    "_meta": {
+        "version": "1.0",
+        "strict": false,
+        "description": "Run-time settings of the StreamLogging module. Rename 'Sample' in the file name to match the name of the calling script."
+    },
+    "LogLevel": {
+        "_meta": {
+            "description": "Maximum level at which the log entries must be written.",
+            "values": "None,Error,Warning,Info,Debug",
+            "defaultValue": "Info"
+        },
+        "value": "Debug"
+    },
+    "Console": {
+        "_meta": {
+            "description": "When set, log entries will be written to the console.",
+            "defaultValue": "Info"
+        },
+        "value": true
+    },
+    "File": {
+        "_meta": {
+            "description": "When set, log entries will be written to the log file."
+        },
+        "value": true
+    },
+    "ErrorFile": {
+        "_meta": {
+            "description": "When set, error log entries will be copied to the error file."
+        },
+        "value": true
+    },
+    "FilePath": {
+        "_meta": {
+            "description": "Custom log file path."
+        },
+        "value": null
+    },
+    "ErrorFilePath": {
+        "_meta": {
+            "description": "Custom error file path."
+        },
+        "value": null,
+        "hasValue": false
+    },
+    "Backup": {
+        "_meta": {
+            "description": "When set, existing log and error files will be backed up before the new files get created."
+        },
+        "value": null,
+        "hasValue": false
+    },
+    "Overwrite": {
+        "_meta": {
+            "description": "When set, existing log and error files will be overwritten."
+        },
+        "value": null,
+        "hasValue": false
+    },
+    "Append": {
+        "_meta": {
+            "description": "When set, existing log and error files will be appended with the new log entries."
+        },
+        "value": null,
+        "hasValue": false
+    },
+    "WithLogLevel": {
+        "_meta": {
+            "description": "When set, log levels will be included in the log messages written to the log and error files."
+        },
+        "value": null,
+        "hasValue": false
+    },
+    "WithTimestamp": {
+        "_meta": {
+            "description": "When set, timestams will be included in the log messages written to the log and error files."
+        },
+        "value": null,
+        "hasValue": false
+    },
+    "TimestampFormat": {
+        "_meta": {
+            "description": "Defines timestamp format to be used in the log message prefixes.",
+            "values": "yyyy-MM-dd HH:mm:ss"
+        },
+        "value": null
+    },
+    "UtcTime": {
+        "_meta": {
+            "description": "When set, timestamps will be logged in Universal Time (GMT)."
+        },
+        "value": null,
+        "hasValue": false
+    },
+    "TabSize": {
+        "_meta": {
+            "description": "Number of space characters to be used in a single indentation.",
+            "default": 2
+        },
+        "value": null
+    },
+    "BackgroundColor": {
+        "_meta": {
+            "description": "Background color to be applied to all messages written to the console.",
+            "values": "Black,DarkBlue,DarkGreen,DarkCyan,DarkRed,DarkMagenta,DarkYellow,Gray,DarkGray,Blue,Green,Cyan,Red,Magenta,Yellow,White"
+        },
+        "value": null
+    },
+    "BackgroundColorError": {
+        "_meta": {
+            "description": "Background color to be applied to the error message written to the console.",
+            "values": "Black,DarkBlue,DarkGreen,DarkCyan,DarkRed,DarkMagenta,DarkYellow,Gray,DarkGray,Blue,Green,Cyan,Red,Magenta,Yellow,White"
+        },
+        "value": null
+    },
+    "BackgroundColorWarning": {
+        "_meta": {
+            "description": "Background color to be applied to the warnings written to the console.",
+            "values": "Black,DarkBlue,DarkGreen,DarkCyan,DarkRed,DarkMagenta,DarkYellow,Gray,DarkGray,Blue,Green,Cyan,Red,Magenta,Yellow,White"
+        },
+        "value": null
+    },
+    "BackgroundColorInfo": {
+        "_meta": {
+            "description": "Background color to be applied to the informational messages written to the console.",
+            "values": "Black,DarkBlue,DarkGreen,DarkCyan,DarkRed,DarkMagenta,DarkYellow,Gray,DarkGray,Blue,Green,Cyan,Red,Magenta,Yellow,White"
+        },
+        "value": null
+    },
+    "BackgroundColorDebug": {
+        "_meta": {
+            "description": "Background color to be applied to the debug messages written to the console.",
+            "values": "Black,DarkBlue,DarkGreen,DarkCyan,DarkRed,DarkMagenta,DarkYellow,Gray,DarkGray,Blue,Green,Cyan,Red,Magenta,Yellow,White"
+        },
+        "value": null
+    },
+    "ForegroundColor": {
+        "_meta": {
+            "description": "Background color to be applied to all messages written to the console.",
+            "values": "Black,DarkBlue,DarkGreen,DarkCyan,DarkRed,DarkMagenta,DarkYellow,Gray,DarkGray,Blue,Green,Cyan,Red,Magenta,Yellow,White"
+        },"value": null
+    },
+    "ForegroundColorError": {
+        "_meta": {
+            "description": "Background color to be applied to the error messages written to the console.",
+            "values": "Black,DarkBlue,DarkGreen,DarkCyan,DarkRed,DarkMagenta,DarkYellow,Gray,DarkGray,Blue,Green,Cyan,Red,Magenta,Yellow,White"
+        },
+        "value": null
+    },
+    "ForegroundColorWarning": {
+        "_meta": {
+            "description": "Background color to be applied to warnings written to the console.",
+            "values": "Black,DarkBlue,DarkGreen,DarkCyan,DarkRed,DarkMagenta,DarkYellow,Gray,DarkGray,Blue,Green,Cyan,Red,Magenta,Yellow,White"
+        },
+        "value": null
+    },
+    "ForegroundColorInfo": {
+        "_meta": {
+            "description": "Background color to be applied to the informational messages written to the console.",
+            "values": "Black,DarkBlue,DarkGreen,DarkCyan,DarkRed,DarkMagenta,DarkYellow,Gray,DarkGray,Blue,Green,Cyan,Red,Magenta,Yellow,White"
+        },
+        "value": null
+    },
+    "ForegroundColorDebug": {
+        "_meta": {
+            "description": "Background color to be applied to the debug messages written to the console.",
+            "values": "Black,DarkBlue,DarkGreen,DarkCyan,DarkRed,DarkMagenta,DarkYellow,Gray,DarkGray,Blue,Green,Cyan,Red,Magenta,Yellow,White"
+        },
+        "value": null
+    }
+}
