@@ -169,4 +169,4 @@ Write-LogWarning -Message "Hello, warning!" -NoFile
 ```
 
 ## Sample
-For a more complete example illustrating how to use the `StreamLogging` module, see the [https://github.com/alekdavis/PowerShellScriptTemplate](sample script).
+For a more complete example illustrating how to use the `StreamLogging` module, see the [sample script](https://github.com/alekdavis/PowerShellScriptTemplate).
