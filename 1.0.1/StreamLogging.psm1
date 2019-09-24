@@ -1208,6 +1208,7 @@ function Start-Logging {
     [CmdletBinding(DefaultParameterSetName="default")]
     param (
         [ValidateSet("None", "Error", "Warning", "Info", "Debug")]
+        [Alias("Log", "Level")]
         [string]
         $LogLevel = "Info",
 
@@ -1604,6 +1605,7 @@ function Write-Log {
     [CmdletBinding(DefaultParameterSetName="Message")]
     param (
         [ValidateSet("Error", "Warning", "Info", "Debug")]
+        [Alias("Log", "Level")]
         [string]
         $LogLevel = "Info",
 
