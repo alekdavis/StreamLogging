@@ -48,17 +48,20 @@ You can indent a log entry by setting the `Indent` parameter to a positive numbe
 When writing log entries, you can force the module to skip writing to the console or files even if they are set ups as logging targets using the `NoConsole` and `NoFile` switches.
 
 ## Usage
+You can download a copy of the module from this Github repository or install it from the [PowerShell Gallery](https://www.powershellgallery.com/packages/StreamLogging).
+
+### Functions
 The `StreamLogging` module exposes the following functions:
 
-### Format-LogPath
+#### Format-LogPath
 Allows you to customize parts of the default log or error file paths. The default log file are created in the same folder as the calling script with the same name and the `.log` and `.err.log` extensions. For example, for the script path `C:\Scripts\MyScript.ps1`, the default log and error file paths would be `C:\Scripts\MyScript.log` and `C:\Scripts\MyScript.err.log` respectively. Say, you want to use the default names and extensions but place the file in the `D:\Logs` folder. This is how you generate the file paths:
 
 ```PowerShell
-$logFilePath = Format-LogPath -Directory "D:\Logs"                # -> D:\Logs\MyScript.log
-$errFilePath = Format-LogPath -Directory "D:\Logs" -IsErrorFile   # -> D:\Logs\MyScript.err.log
+$logFilePath = Format-LogFilePath -Directory "D:\Logs"                # -> D:\Logs\MyScript.log
+$errFilePath = Format-LogFilePath -Directory "D:\Logs" -IsErrorFile   # -> D:\Logs\MyScript.err.log
 ```
 
-### Get-LoggingConfig
+#### Get-LoggingConfig
 
 Returns logging configuration settings in a JSON or an XML format (in case you want to verify or print them). Notice  that the returned configuration does not reflect console font and background colors assigned to different log levels. To return result in a compact form, use the `Compress` switch:
 
@@ -67,7 +70,7 @@ $logConfigJson = Get-LoggingConfig -Compress
 $logConfigXML  = Get-LoggingConfig -Compress
 ```
 
-### Start-Logging
+#### Start-Logging
 
 Initializes log settings (but does not create the log or error files until the first entry is written). By default, the initialization function will configure logging to write informational messages, warnings, and errors the console. You can adjust the setting by passing them to the `Start-Logging` function explicitly, or define them in the configuration file (command-line parameters have higher precedence than the configuration file values). The configuration file is not required but you may find it handy.
 
@@ -95,7 +98,7 @@ Start-Logging -ConfigFile "D:\Common\LogConfig.json" -LogLevel Debug -WithLogLev
 ```
 Initializes log settings using the custom configuration file with the `D:\Common\LogConfig.json` path, but sets the log level to `Debug`, and add prefix with the UTC timestamp and message log level to each line written to the log and/or error files.
 
-### Stop-Logging
+#### Stop-Logging
 
 Closes open files and resets log settings. If you are logging to files, make sure you call this function before your script exits:
 
@@ -103,7 +106,7 @@ Closes open files and resets log settings. If you are logging to files, make sur
 Stop-Logging
 ```
 
-### Write-Log
+#### Write-Log
 
 Writes a log entry of the specified log level (`Info` is the default) to the log targets. You can also use it to log an error object. Hera are a few examples of how you can invoke the `Write-Log` function:
 
@@ -117,7 +120,7 @@ Write-Log -LogLevel Warning "Hello, warning"
 Write-Log -LogLevel Debug "Hello, debug!" -NoFile
 ```
 
-### Write-LogDebug
+#### Write-LogDebug
 
 Writes a debug message to the log targets, e.g.:
 
@@ -127,7 +130,7 @@ Write-LogDebug "Hello, debug!" -Indent 1
 Write-LogDebug -Message "Hello, debug!" -NoFile
 ```
 
-### Write-LogError
+#### Write-LogError
 
 Writes an error message to the log targets, e.g.:
 
@@ -137,7 +140,7 @@ Write-LogError "Hello, error!" -Indent 1
 Write-LogError -Message "Hello, error!" -NoFile
 ```
 
-### Write-LogException
+#### Write-LogException
 
 Writes error information from the global `$Error` object or a custom exception to the log targets:
 
@@ -148,7 +151,7 @@ Write-LogException $Error
 $Error | Write-Exception -Raw
 ```
 
-### Write-LogInfo
+#### Write-LogInfo
 
 Writes an informational message to the log targets, e.g.:
 
@@ -158,7 +161,7 @@ Write-LogInfo "Hello, info!" -Indent 1
 Write-LogInfo -Message "Hello, info!" -NoFile
 ```
 
-### Write-LogWarning
+#### Write-LogWarning
 
 Writes a warning to the log targets, e.g.:
 
@@ -168,5 +171,5 @@ Write-LogWarning "Hello, warning!" -Indent 1
 Write-LogWarning -Message "Hello, warning!" -NoFile
 ```
 
-## Sample
+### Samples
 For a more complete example illustrating how to use the `StreamLogging` module, see the [sample script](https://github.com/alekdavis/PowerShellScriptTemplate).
