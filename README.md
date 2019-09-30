@@ -31,7 +31,7 @@ The default log and error files are created in the same folder as the running sc
 
 - `None`: Logging is turned off.
 - `Error`: Only errors and exceptions are logged.
-- `Warnings`: Warnings and errors are logged.
+- `Warning`: Warnings and errors are logged.
 - `Info`: Informational messsages are logged along with warnings and errors.
 - `Debug`: Debug messages are logged along with everything else.
 
