@@ -12,7 +12,7 @@ Most (if not all) available PowerShell logging modules are not designed for effi
 This may not be a big deal, but as your log file grows, your script performance will have to pay a performance penalty. If you are not willing to tolerate performance degradation caused by the logging calls, consider using this module.
 
 ## Overview
-As the name implies, the `StreamLogging` module uses the standard .NET [StreaWriter class](https://docs.microsoft.com/en-us/dotnet/api/system.io.streamwriter) to implement logging. Instead of opening and closing the file every time the script needs to write a message, it keeps the stream open until logging is complete.
+As the name implies, the `StreamLogging` module uses the standard .NET [StreamWriter class](https://docs.microsoft.com/en-us/dotnet/api/system.io.streamwriter) to implement logging. Instead of opening and closing the file every time the script needs to write a message, it keeps the stream open until logging is complete.
 
 ### Configuration
 You can define the log configuration settings using the `Start-Logging` function. The function initializes log settings using the explicitly specified parameter or an optional configuration file (function parameters always take precedence). The default configuration file must be located in the same folder as the calling script and named after it with the `.StreamLogging.json` extension (you can adjust the extension or specify the whole path via the `ConfigFile` parameter). A sample configuration file is included. You can also check a working sample at the [PowerShell script template repository](https://github.com/alekdavis/PowerShellScriptTemplate).
