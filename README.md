@@ -67,7 +67,7 @@ Returns logging configuration settings in a JSON or an XML format (in case you w
 
 ```PowerShell
 $logConfigJson = Get-LoggingConfig -Compress
-$logConfigXML  = Get-LoggingConfig -Compress
+$logConfigXML  = Get-LoggingConfig -Compress -Xml
 ```
 
 #### Start-Logging
