@@ -29,7 +29,7 @@
     Copyright = '(c) 2019 Alek Davis. All rights reserved.'
 
     # Description of the functionality provided by this module
-    Description = 'Logs messages to the console and/or text files.'
+    Description = 'Logs messages to the console and/or text files using StreamWriter.'
 
     # Minimum version of the Windows PowerShell engine required by this module
     PowerShellVersion = '4.0'
