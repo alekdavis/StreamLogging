@@ -609,7 +609,7 @@ function IsLoggableToFile {
 # LogToConsole
 #   Writes log message to the console.
 function LogToConsole {
-    [CmdletBinding(DefaultParameterSetName="")]
+    [CmdletBinding()]
     param (
         [string]
         [ValidateSet("Error", "Warning", "Info", "Debug")]
@@ -828,6 +828,38 @@ function OpenFile {
 }
 
 #--------------------------------------------------------------------------
+# SerializeObject
+#   Converts object to a JSON or XML string.
+function SerializeObject {
+    [CmdletBinding()]
+    param (
+        [Parameter(Position=0,ValueFromPipeline)]
+        [object]
+        $object,
+
+        [Parameter(Position=1)]
+        [bool]
+        $xml,
+
+        [Parameter(Position=2)]
+        [bool]
+        $compress
+    )
+
+    if ($xml) {
+        return ($object | ConvertTo-Xml -As String).Trim()
+    }
+    else {
+        if ($compress) {
+            return ($object | ConvertTo-Json -Compress).Trim()
+        }
+        else {
+            return ($object | ConvertTo-Json).Trim()
+        }
+    }
+}
+
+#--------------------------------------------------------------------------
 # WriteLog
 #   Writes log entry to the console and/or log files.
 function WriteLog {
@@ -1007,16 +1039,16 @@ function Format-LogFilePath {
 
 <#
 .SYNOPSIS
-Returns serialized stream logging configuration settings.
+Returns stream logging configuration settings.
 
 .DESCRIPTION
-Use this function if you need to display stream logging configuration settings.
+Use this function if you need to use otr display stream logging configuration settings.
 
-.PARAMETER Xml
-When set, the settings will be serialized as XML; otherwise, they will be serialized as JSON.
+.PARAMETER Json
+When set, the settings will be serialized as JSON.
 
 .PARAMETER Compress
-When set, the settings will be serialized in a compact format.
+When set, the settings will be serialized in a JSON compact format.
 
 .LINK
 https://github.com/alekdavis/StreamLogging
@@ -1036,11 +1068,13 @@ $logSettings = Get-LoggingConfig -Xml -Json
 Returns logging configuration settings formatted as a compressed XML string.
 #>
 function Get-LoggingConfig {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName="default")]
     param (
+        [Parameter(ParameterSetName="Json")]
         [switch]
-        $Xml,
+        $Json,
 
+        [Parameter(ParameterSetName="Json")]
         [switch]
         $Compress
     )
@@ -1054,23 +1088,16 @@ function Get-LoggingConfig {
         $DebugPreference = $PSCmdlet.GetVariableValue('DebugPreference')
     }
 
-    if ($Xml) {
-        if ($Compress) {
-            return ($Script:Config | ConvertTo-Xml -Compress).Trim()
-        }
-        else {
-            return ($Script:Config | ConvertTo-Xml).Trim()
-        }
-    }
-    else {
-        if ($Compress) {
-            return ($Script:Config | ConvertTo-Json -Compress).Trim()
-        }
-        else {
-            return ($Script:Config | ConvertTo-Json).Trim()
-        }
+    if ((-not $Json) -and (-not $Compress)) {
+        return $Script:Config
     }
 
+    if ($Compress) {
+        return ($Script:Config | ConvertTo-Json -Compress).Trim()
+    }
+    else {
+        return ($Script:Config | ConvertTo-Json).Trim()
+    }
 }
 
 <#
@@ -1560,6 +1587,12 @@ When set, the log entry will not be written to the log and/or error files even i
 .PARAMETER Raw
 When set, the value of the '-Errors' parameter will be written using the default serialization (by default, only error messages from all errors in the collection will be logged without any additional exception data).
 
+.PARAMETER Object
+Use this parameter to log an object serialized as a JSON string.
+
+.PARAMETER Compress
+When logging an object, use this parameter to serialize it in a compact format.
+
 .LINK
 https://github.com/alekdavis/StreamLogging
 
@@ -1628,7 +1661,13 @@ function Write-Log {
         $NoFile,
 
         [switch]
-        $Raw
+        $Raw,
+
+        [object]
+        $Object,
+
+        [switch]
+        $Compress
     )
     # Allow module to inherit '-Verbose' flag.
     if (($PSCmdlet) -and (!($PSBoundParameters.ContainsKey('Verbose')))) {
@@ -1651,13 +1690,32 @@ function Write-Log {
     if ($NoConsole)     { $args.Add("NoConsole", $true) }
     if ($NoFile)        { $args.Add("NoFile", $true) }
 
+    # Add object info, if one was specified.
+    if ($PSBoundParameters.ContainsKey("Object") -and ($null -ne $Object)) {
+        $args.Add("Object", $Object)
+        if ($Compress) {
+            $args.Add("Compress", $true)
+        }
+    }
+
+    if ($PSBoundParameters.ContainsKey("Message") -or ($Message)) {
+        $args.Add("Message", $Message)
+    }
+
     switch ($LogLevel) {
         $LOGLEVEL_ERROR {
             # If we have a message, log it first.
-            if ($Message) {
-                $args.Add("Message", $Message)
-                Write-LogError @args
+            if ($PSBoundParameters.ContainsKey("Message") -or ($Message)) {
+                Write-LogError $args
                 $args.Remove("Message")
+                if ($args.ContainsKey("Object")) {
+                    $args.Remove("Object")
+                }
+            }
+
+            if ($args.ContainsKey("Object")) {
+                Write-LogError @args
+                $args.Remove("Object")
             }
 
             # If we have session errors, log them as well.
@@ -1671,21 +1729,15 @@ function Write-Log {
             break;
         }
         $LOGLEVEL_WARNING {
-            if ($Message) {
-                Write-LogWarning -Message $Message @args
-            }
+            Write-LogWarning @args
             break
         }
         $LOGLEVEL_INFO {
-            if ($Message) {
-                Write-LogInfo -Message $Message @args
-            }
+            Write-LogInfo @args
             break
         }
         default {
-            if ($Message) {
-                Write-LogDebug -Message $Message @args
-            }
+            Write-LogDebug @args
             break
         }
     }
@@ -1711,6 +1763,12 @@ When set, the log entry will not be written to the console even if the console w
 
 .PARAMETER NoFile
 When set, the log entry will not be written to the log file even if it was set as a log target by the 'Start-Logging' function.
+
+.PARAMETER Object
+Use this parameter to log an object serialized as a JSON string.
+
+.PARAMETER Compress
+When logging an object, use this parameter to serialize it in a compact format.
 
 .LINK
 https://github.com/alekdavis/StreamLogging
@@ -1742,7 +1800,7 @@ Writes a debug message to the console only, assuming that it is a configured log
 Writes a debug message to the log file only, assuming that it is a configured log target.
 #>
 function Write-LogDebug {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName="default")]
     param (
         [Parameter(Position=0,ValueFromPipeline)]
         [string]
@@ -1759,7 +1817,13 @@ function Write-LogDebug {
 
         [Parameter(Position=3)]
         [switch]
-        $NoFile
+        $NoFile,
+
+        [object]
+        $Object,
+
+        [switch]
+        $Compress
     )
     # Allow module to inherit '-Verbose' flag.
     if (($PSCmdlet) -and (!($PSBoundParameters.ContainsKey('Verbose')))) {
@@ -1775,7 +1839,28 @@ function Write-LogDebug {
         return
     }
 
-    WriteLog $LOGLEVEL_DEBUG $Message $Indent (-not $NoConsole) (-not $NoFile)
+    # Log message (if we have one).
+    if ($PSBoundParameters.ContainsKey("Message") -and ($null -ne $Message)) {
+        WriteLog $LOGLEVEL_DEBUG $Message $Indent (-not $NoConsole) (-not $NoFile)
+    }
+
+    # Log object (if we have one).
+    if (-not $PSBoundParameters.ContainsKey("Object")) {
+        return
+    }
+
+    $Message = $null
+
+    if ($Compress) {
+        $Message = ($Object | ConvertTo-Json -Compress).Trim()
+    }
+    else {
+        $Message = ($Object | ConvertTo-Json).Trim()
+    }
+
+    if ($null -ne $Message) {
+        WriteLog $LOGLEVEL_DEBUG $Message $Indent (-not $NoConsole) (-not $NoFile)
+    }
 }
 
 <#
@@ -1798,6 +1883,12 @@ When set, the log entry will not be written to the console even if the console w
 
 .PARAMETER NoFile
 When set, the log entry will not be written to the log and/or error files even if they were set as the log targets by the 'Start-Logging' function.
+
+.PARAMETER Object
+Use this parameter to log an object serialized as a JSON string.
+
+.PARAMETER Compress
+When logging an object, use this parameter to serialize it in a compact format.
 
 .LINK
 https://github.com/alekdavis/StreamLogging
@@ -1846,7 +1937,13 @@ function Write-LogError {
 
         [Parameter(Position=3)]
         [switch]
-        $NoFile
+        $NoFile,
+
+        [object]
+        $Object,
+
+        [switch]
+        $Compress
     )
     if ($NoConsole -and $NoFile) {
         return
@@ -1861,7 +1958,28 @@ function Write-LogError {
         $DebugPreference = $PSCmdlet.GetVariableValue('DebugPreference')
     }
 
-    WriteLog $LOGLEVEL_ERROR $Message $Indent (-not $NoConsole) (-not $NoFile)
+    # Log message (if we have one).
+    if ($PSBoundParameters.ContainsKey("Message") -and ($null -ne $Message)) {
+        WriteLog $LOGLEVEL_ERROR $Message $Indent (-not $NoConsole) (-not $NoFile)
+    }
+
+    # Log object (if we have one).
+    if (-not $PSBoundParameters.ContainsKey("Object")) {
+        return
+    }
+
+    $Message = $null
+
+    if ($Compress) {
+        $Message = ($Object | ConvertTo-Json -Compress).Trim()
+    }
+    else {
+        $Message = ($Object | ConvertTo-Json).Trim()
+    }
+
+    if ($null -ne $Message) {
+        WriteLog $LOGLEVEL_ERROR $Message $Indent (-not $NoConsole) (-not $NoFile)
+    }
 }
 
 <#
@@ -2032,6 +2150,12 @@ When set, the log entry will not be written to the console even if the console w
 .PARAMETER NoFile
 When set, the log entry will not be written to the log file even if it was set as a log target by the 'Start-Logging' function.
 
+.PARAMETER Object
+Use this parameter to log an object serialized as a JSON string.
+
+.PARAMETER Compress
+When logging an object, use this parameter to serialize it in a compact format.
+
 .LINK
 https://github.com/alekdavis/StreamLogging
 
@@ -2079,7 +2203,13 @@ function Write-LogInfo {
 
         [Parameter(Position=3)]
         [switch]
-        $NoFile
+        $NoFile,
+
+        [object]
+        $Object,
+
+        [switch]
+        $Compress
     )
     # Allow module to inherit '-Verbose' flag.
     if (($PSCmdlet) -and (!($PSBoundParameters.ContainsKey('Verbose')))) {
@@ -2095,7 +2225,28 @@ function Write-LogInfo {
         return
     }
 
-    WriteLog $LOGLEVEL_INFO $Message $Indent (-not $NoConsole) (-not $NoFile)
+    # Log message (if we have one).
+    if ($PSBoundParameters.ContainsKey("Message") -and ($null -ne $Message)) {
+        WriteLog $LOGLEVEL_INFO $Message $Indent (-not $NoConsole) (-not $NoFile)
+    }
+
+    # Log object (if we have one).
+    if (-not $PSBoundParameters.ContainsKey("Object")) {
+        return
+    }
+
+    $Message = $null
+
+    if ($Compress) {
+        $Message = ($Object | ConvertTo-Json -Compress).Trim()
+    }
+    else {
+        $Message = ($Object | ConvertTo-Json).Trim()
+    }
+
+    if ($null -ne $Message) {
+        WriteLog $LOGLEVEL_INFO $Message $Indent (-not $NoConsole) (-not $NoFile)
+    }
 }
 
 <#
@@ -2118,6 +2269,12 @@ When set, the log entry will not be written to the console even if the console w
 
 .PARAMETER NoFile
 When set, the log entry will not be written to the log file even if it was set as a log target by the 'Start-Logging' function.
+
+.PARAMETER Object
+Use this parameter to log an object serialized as a JSON string.
+
+.PARAMETER Compress
+When logging an object, use this parameter to serialize it in a compact format.
 
 .LINK
 https://github.com/alekdavis/StreamLogging
@@ -2166,7 +2323,13 @@ function Write-LogWarning {
 
         [Parameter(Position=3)]
         [switch]
-        $NoFile
+        $NoFile,
+
+        [object]
+        $Object,
+
+        [switch]
+        $Compress
     )
     # Allow module to inherit '-Verbose' flag.
     if (($PSCmdlet) -and (!($PSBoundParameters.ContainsKey('Verbose')))) {
@@ -2182,7 +2345,28 @@ function Write-LogWarning {
         return
     }
 
-    WriteLog $LOGLEVEL_WARNING $Message $Indent (-not $NoConsole) (-not $NoFile)
+    # Log message (if we have one).
+    if ($PSBoundParameters.ContainsKey("Message") -and ($null -ne $Message)) {
+        WriteLog $LOGLEVEL_WARNING $Message $Indent (-not $NoConsole) (-not $NoFile)
+    }
+
+    # Log object (if we have one).
+    if (-not $PSBoundParameters.ContainsKey("Object")) {
+        return
+    }
+
+    $Message = $null
+
+    if ($Compress) {
+        $Message = ($Object | ConvertTo-Json -Compress).Trim()
+    }
+    else {
+        $Message = ($Object | ConvertTo-Json).Trim()
+    }
+
+    if ($null -ne $Message) {
+        WriteLog $LOGLEVEL_WARNING $Message $Indent (-not $NoConsole) (-not $NoFile)
+    }
 }
 
 Export-ModuleMember -Function "*-*"
