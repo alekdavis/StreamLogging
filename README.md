@@ -118,6 +118,7 @@ Write-Log -Error -NoConsole -Raw
 Write-Log -Error "Hello, error"
 Write-Log -LogLevel Warning "Hello, warning"
 Write-Log -LogLevel Debug "Hello, debug!" -NoFile
+Write-Log -LogLevel Debug "My object:" -Object ({"Key1":"Value1";"Key2":"Value2"}) -Compress
 ```
 
 #### Write-LogDebug
@@ -128,6 +129,7 @@ Writes a debug message to the log targets, e.g.:
 "Hello, debug!" | Write-LogDebug
 Write-LogDebug "Hello, debug!" -Indent 1
 Write-LogDebug -Message "Hello, debug!" -NoFile
+Write-LogDebug "My object:" -Object ({"Key1":"Value1";"Key2":"Value2"}) -Compress
 ```
 
 #### Write-LogError
@@ -138,6 +140,7 @@ Writes an error message to the log targets, e.g.:
 "Hello, error!" | Write-LogError
 Write-LogError "Hello, error!" -Indent 1
 Write-LogError -Message "Hello, error!" -NoFile
+Write-LogError "My object:" -Object ({"Key1":"Value1";"Key2":"Value2"}) -Compress
 ```
 
 #### Write-LogException
@@ -159,6 +162,7 @@ Writes an informational message to the log targets, e.g.:
 "Hello, info!" | Write-LogInfo
 Write-LogInfo "Hello, info!" -Indent 1
 Write-LogInfo -Message "Hello, info!" -NoFile
+Write-LogInfo "My object:" -Object ({"Key1":"Value1";"Key2":"Value2"}) -Compress
 ```
 
 #### Write-LogWarning
@@ -169,6 +173,7 @@ Writes a warning to the log targets, e.g.:
 "Hello, warning!" | Write-LogWarning
 Write-LogWarning "Hello, warning!" -Indent 1
 Write-LogWarning -Message "Hello, warning!" -NoFile
+Write-LogWarning "My object:" -Object ({"Key1":"Value1";"Key2":"Value2"}) -Compress
 ```
 
 ### Samples
