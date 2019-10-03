@@ -63,11 +63,12 @@ $errFilePath = Format-LogFilePath -Directory "D:\Logs" -IsErrorFile   # -> D:\Lo
 
 #### Get-LoggingConfig
 
-Returns logging configuration settings in a JSON or an XML format (in case you want to verify or print them). Notice  that the returned configuration does not reflect console font and background colors assigned to different log levels. To return result in a compact form, use the `Compress` switch:
+Returns logging configuration settings (in case you want to verify or print them). Notice  that the returned configuration does not reflect console font and background colors assigned to different log levels. By default, logging configuration settings are returned in the form of a hash table, but you can use the `Json` and/or the `Compress` switches to return them in the JSON or compressed JSON format:
 
 ```PowerShell
-$logConfigJson = Get-LoggingConfig -Compress
-$logConfigXML  = Get-LoggingConfig -Compress -Xml
+$logConfig      = Get-LoggingConfig
+$logConfigJson  = Get-LoggingConfig -Json
+$logConfigJson  = Get-LoggingConfig -Compress
 ```
 
 #### Start-Logging
