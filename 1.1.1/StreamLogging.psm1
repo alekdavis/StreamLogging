@@ -1706,7 +1706,7 @@ function Write-Log {
         $LOGLEVEL_ERROR {
             # If we have a message, log it first.
             if ($PSBoundParameters.ContainsKey("Message") -or ($Message)) {
-                Write-LogError $args
+                Write-LogError @args
                 $args.Remove("Message")
                 if ($args.ContainsKey("Object")) {
                     $args.Remove("Object")
