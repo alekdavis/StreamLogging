@@ -11,7 +11,7 @@
     RootModule = 'StreamLogging.psm1'
 
     # Version number of this module.
-    ModuleVersion = '1.1.1'
+    ModuleVersion = '1.2.0'
 
     # Supported PSEditions
     # CompatiblePSEditions = @()
@@ -26,7 +26,7 @@
     CompanyName = 'Unknown'
 
     # Copyright statement for this module
-    Copyright = '(c) 2019 Alek Davis. All rights reserved.'
+    Copyright = '(c) 2020 Alek Davis. All rights reserved.'
 
     # Description of the functionality provided by this module
     Description = 'Logs messages to the console and/or text files using StreamWriter.'

@@ -1559,6 +1559,43 @@ function Stop-Logging {
 
 <#
 .SYNOPSIS
+Checks if logging was initialized.
+
+.DESCRIPTION
+Call this function to check whether you need to call Stop-Logging to uninitialize resources.
+
+.LINK
+https://github.com/alekdavis/StreamLogging
+
+.INPUTS
+None.
+
+.OUTPUTS
+None.
+
+.EXAMPLE
+if (Test-LoggingStarted) Stop-Logging
+Checks if logging started and if so calls Stop-Logging to close allocated resources.
+#>
+function Test-LoggingStarted {
+    [CmdletBinding()]
+    param (
+    )
+    # Allow module to inherit '-Verbose' flag.
+    if (($PSCmdlet) -and (!($PSBoundParameters.ContainsKey('Verbose')))) {
+        $VerbosePreference = $PSCmdlet.GetVariableValue('VerbosePreference')
+    }
+
+    # Allow module to inherit '-Debug' flag.
+    if (($PSCmdlet) -and (!($PSBoundParameters.ContainsKey('Debug')))) {
+        $DebugPreference = $PSCmdlet.GetVariableValue('DebugPreference')
+    }
+
+    return $Script:Config.Initialized
+}
+
+<#
+.SYNOPSIS
 Writes a log entry.
 
 .DESCRIPTION
@@ -1683,61 +1720,61 @@ function Write-Log {
         return
     }
 
-    $args = @{}
+    $params = @{}
 
     # Set common parameters.
-    if ($Indent -gt 0)  { $args.Add("Indent", $Indent) }
-    if ($NoConsole)     { $args.Add("NoConsole", $true) }
-    if ($NoFile)        { $args.Add("NoFile", $true) }
+    if ($Indent -gt 0)  { $params.Add("Indent", $Indent) }
+    if ($NoConsole)     { $params.Add("NoConsole", $true) }
+    if ($NoFile)        { $params.Add("NoFile", $true) }
 
     # Add object info, if one was specified.
     if ($PSBoundParameters.ContainsKey("Object") -and ($null -ne $Object)) {
-        $args.Add("Object", $Object)
+        $params.Add("Object", $Object)
         if ($Compress) {
-            $args.Add("Compress", $true)
+            $params.Add("Compress", $true)
         }
     }
 
     if ($PSBoundParameters.ContainsKey("Message") -or ($Message)) {
-        $args.Add("Message", $Message)
+        $params.Add("Message", $Message)
     }
 
     switch ($LogLevel) {
         $LOGLEVEL_ERROR {
             # If we have a message, log it first.
             if ($PSBoundParameters.ContainsKey("Message") -or ($Message)) {
-                Write-LogError @args
-                $args.Remove("Message")
-                if ($args.ContainsKey("Object")) {
-                    $args.Remove("Object")
+                Write-LogError @params
+                $params.Remove("Message")
+                if ($params.ContainsKey("Object")) {
+                    $params.Remove("Object")
                 }
             }
 
-            if ($args.ContainsKey("Object")) {
-                Write-LogError @args
-                $args.Remove("Object")
+            if ($params.ContainsKey("Object")) {
+                Write-LogError @params
+                $params.Remove("Object")
             }
 
             # If we have session errors, log them as well.
             if ($Errors) {
-                $args.Add("Errors", $Errors)
+                $params.Add("Errors", $Errors)
                 if ($Raw) {
-                    $args.Add("Raw", $true)
+                    $params.Add("Raw", $true)
                 }
-                Write-LogException @args
+                Write-LogException @params
             }
             break;
         }
         $LOGLEVEL_WARNING {
-            Write-LogWarning @args
+            Write-LogWarning @params
             break
         }
         $LOGLEVEL_INFO {
-            Write-LogInfo @args
+            Write-LogInfo @params
             break
         }
         default {
-            Write-LogDebug @args
+            Write-LogDebug @params
             break
         }
     }
