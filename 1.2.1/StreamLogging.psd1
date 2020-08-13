@@ -11,7 +11,7 @@
     RootModule = 'StreamLogging.psm1'
 
     # Version number of this module.
-    ModuleVersion = '1.2.0'
+    ModuleVersion = '1.2.1'
 
     # Supported PSEditions
     # CompatiblePSEditions = @()
@@ -106,7 +106,7 @@
             # IconUri = ''
 
             # ReleaseNotes of this module
-            # ReleaseNotes = ''
+            ReleaseNotes = 'Display error messages from inner exceptions.'
 
             # External dependent modules of this module
             # ExternalModuleDependencies = ''

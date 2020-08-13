@@ -87,9 +87,10 @@ $Stream = [PSCustomObject]@{
 # It would be nice to get colors dynamically, but this would break in
 # PowerShell ISE because it uses 32-bit colors instead of 8-bit colors.
 
-$COLOR_ERROR    = "Red"
-$COLOR_WARNING  = "Yellow"
-$COLOR_DEBUG    = "Gray"
+$COLOR_ERROR        = "Red"
+$COLOR_WARNING      = "Yellow"
+$COLOR_DEBUG        = "Gray"
+$BACKGROUND_COLOR   = "Black"
 
 $ForegroundColors = @{
     $LOGLEVEL_ERROR   = $COLOR_ERROR   # $Host.PrivateData.ErrorForegroundColor
@@ -99,10 +100,10 @@ $ForegroundColors = @{
 }
 
 $BackgroundColors = @{
-    $LOGLEVEL_ERROR   = $null # $Host.PrivateData.ErrorBackgroundColor
-    $LOGLEVEL_WARNING = $null # $Host.PrivateData.WarningBackgroundColor
+    $LOGLEVEL_ERROR   = $BACKGROUND_COLOR # $Host.PrivateData.ErrorBackgroundColor
+    $LOGLEVEL_WARNING = $BACKGROUND_COLOR # $Host.PrivateData.WarningBackgroundColor
     $LOGLEVEL_INFO    = $null
-    $LOGLEVEL_DEBUG   = $null # $Host.PrivateData.DebugBackgroundColor
+    $LOGLEVEL_DEBUG   = $BACKGROUND_COLOR # $Host.PrivateData.DebugBackgroundColor
 }
 
 # File extensions.
@@ -200,6 +201,35 @@ function FormatLine {
     }
 
     return $prefix + $line
+}
+
+
+#--------------------------------------------------------------------------
+# FormatError
+#   Returns error message from exception and inner exceptions.
+function FormatError {
+    [CmdletBinding()]
+    param (
+        $ex
+    )
+
+    if (!$ex) {
+        return $null
+    }
+
+    [string]$message = $null
+
+    while ($ex) {
+        if ($message) {
+            $message += " "
+        }
+
+        $message = $ex.Message.Trim()
+
+        $ex = $ex.InnerException
+    }
+
+    return $message
 }
 
 #--------------------------------------------------------------------------
@@ -461,10 +491,10 @@ function Initialize {
     }
 
     $Script:BackgroundColors = @{
-        $LOGLEVEL_ERROR   = $null
-        $LOGLEVEL_WARNING = $null
+        $LOGLEVEL_ERROR   = $BACKGROUND_COLOR
+        $LOGLEVEL_WARNING = $BACKGROUND_COLOR
         $LOGLEVEL_INFO    = $null
-        $LOGLEVEL_DEBUG   = $null
+        $LOGLEVEL_DEBUG   = $BACKGROUND_COLOR
     }
 
     if ($Script:Stream.LogFile) {
@@ -1194,10 +1224,34 @@ When set, timestamps will contain time in Universal Time Coordinates (UTC, or GM
 Defines the number of indent spaces. The default value is 2.
 
 .PARAMETER BackgroundColor
-Specifies the console background color. When defined, it will be applied to the log entries of all log levels. You can specify individual colors for each log level using the configuration file (see the description of the '-ConfigFile' parameter).
+Specifies the console background color. When defined, it will be applied to the log entries of all log levels. You can specify individual colors for each log level using the corresponding parameter: BackgroundColorError, BackgroundColorWarning, BackgroundColorInfo, BackgroundColorDebug.
+
+.PARAMETER BackgroundColorError
+Specifies the console background color for error messages. The default value is 'Red'.
+
+.PARAMETER BackgroundColorWarning
+Specifies the console background color for warnings. The default value is 'Yellow'.
+
+.PARAMETER BackgroundColorInfo
+Specifies the console background color for informational messages.
+
+.PARAMETER BackgroundColorDebug
+Specifies the console background color for debug messages. The default value is 'Gray'.
 
 .PARAMETER ForegroundColor
-Specifies the console font color. When defined, it will be applied to the log entries of all log levels. You can specify individual colors for each log level using the configuration file (see the description of the '-ConfigFile' parameter).
+Specifies the console font color. When defined, it will be applied to the log entries of all log levels. You can specify individual colors for each log level using the corresponding parameter: ForegroundColorError, ForegroundColorWarning, ForegroundColorInfo, ForegroundColorDebug.
+
+.PARAMETER ForegroundColorError
+Specifies the console font color for error messages. The default value is 'Black'.
+
+.PARAMETER ForegroundColorWarning
+Specifies the console font color for warnings. The default value is 'Black'.
+
+.PARAMETER ForegroundColorInfo
+Specifies the console font color for informational messages.
+
+.PARAMETER ForegroundColorDebug
+Specifies the console font color for debug messages. The default value is 'Black'.
 
 .PARAMETER ConfigFile
 Specifies the path or extension of the logging configuration file described above (in the DESCRIPTION section). If no file is found under the path, the parameter value will be appended to the path of the running script. For example, if you set the value to '.Log.config', for the running script with path 'D:\Scripts\MyScript.ps1', the config file path will be formatted as 'D:\Scripts\MyScript.ps1.Log.config'. The default config file path is named after the running script with the '.StreamLogging.json' extension (in our example, it would point to 'D:\Scripts\MyScript.ps1.StreamLogging.json'). If the 'ConfigFile' value is explicitly set, the file with the same path (or extension) must exist. If this parameter is not specified, the file located at the default path is optional.
@@ -1285,6 +1339,9 @@ function Start-Logging {
         [int]
         $TabSize = 2,
 
+        [Parameter(ParameterSetName="BackgroundColorGlobal")]
+        [Parameter(ParameterSetName="ForegroundColorGlobal", Mandatory)]
+        [Parameter(ParameterSetName="ForegroundColorSpecific", Mandatory)]
         [ValidateSet(
             "Black",
             "DarkBlue",
@@ -1306,6 +1363,105 @@ function Start-Logging {
         [string]
         $BackgroundColor,
 
+        [Parameter(ParameterSetName="BackgroundColorSpecific")]
+        [Parameter(ParameterSetName="ForegroundColorGlobal", Mandatory)]
+        [Parameter(ParameterSetName="ForegroundColorSpecific", Mandatory)]
+        [ValidateSet(
+            "Black",
+            "DarkBlue",
+            "DarkGreen",
+            "DarkCyan",
+            "DarkRed",
+            "DarkMagenta",
+            "DarkYellow",
+            "Gray",
+            "DarkGray",
+            "Blue",
+            "Green",
+            "Cyan",
+            "Red",
+            "Magenta",
+            "Yellow",
+            "White")]
+        [Alias("BackgroundError")]
+        [string]
+        $BackgroundColorError = "Black",
+
+        [Parameter(ParameterSetName="BackgroundColorSpecific")]
+        [Parameter(ParameterSetName="ForegroundColorGlobal", Mandatory)]
+        [Parameter(ParameterSetName="ForegroundColorSpecific", Mandatory)]
+        [ValidateSet(
+            "Black",
+            "DarkBlue",
+            "DarkGreen",
+            "DarkCyan",
+            "DarkRed",
+            "DarkMagenta",
+            "DarkYellow",
+            "Gray",
+            "DarkGray",
+            "Blue",
+            "Green",
+            "Cyan",
+            "Red",
+            "Magenta",
+            "Yellow",
+            "White")]
+        [Alias("BackgroundWarning")]
+        [string]
+        $BackgroundColorWarning = "Black",
+
+        [Parameter(ParameterSetName="BackgroundColorSpecific")]
+        [Parameter(ParameterSetName="ForegroundColorGlobal", Mandatory)]
+        [Parameter(ParameterSetName="ForegroundColorSpecific", Mandatory)]
+        [ValidateSet(
+            "Black",
+            "DarkBlue",
+            "DarkGreen",
+            "DarkCyan",
+            "DarkRed",
+            "DarkMagenta",
+            "DarkYellow",
+            "Gray",
+            "DarkGray",
+            "Blue",
+            "Green",
+            "Cyan",
+            "Red",
+            "Magenta",
+            "Yellow",
+            "White")]
+        [Alias("BackgroundInfo")]
+        [string]
+        $BackgroundColorInfo,
+
+        [Parameter(ParameterSetName="BackgroundColorSpecific")]
+        [Parameter(ParameterSetName="ForegroundColorGlobal", Mandatory)]
+        [Parameter(ParameterSetName="ForegroundColorSpecific", Mandatory)]
+        [ValidateSet(
+            "Black",
+            "DarkBlue",
+            "DarkGreen",
+            "DarkCyan",
+            "DarkRed",
+            "DarkMagenta",
+            "DarkYellow",
+            "Gray",
+            "DarkGray",
+            "Blue",
+            "Green",
+            "Cyan",
+            "Red",
+            "Magenta",
+            "Yellow",
+            "White")]
+        [Alias("BackgroundDebug")]
+        [string]
+        $BackgroundColorDebug = "Black",
+
+        [Parameter(ParameterSetName="ForegroundColorGlobal")]
+        [Parameter(ParameterSetName="BackgroundColorGlobal", Mandatory)]
+        [Parameter(ParameterSetName="BackgroundColorSpecific", Mandatory)]
         [ValidateSet(
             "Black",
             "DarkBlue",
@@ -1327,21 +1483,106 @@ function Start-Logging {
         [string]
         $ForegroundColor,
 
+        [Parameter(ParameterSetName="ForegroundColorSpecific")]
+        [Parameter(ParameterSetName="BackgroundColorGlobal", Mandatory)]
+        [Parameter(ParameterSetName="BackgroundColorSpecific", Mandatory)]
+        [ValidateSet(
+            "Black",
+            "DarkBlue",
+            "DarkGreen",
+            "DarkCyan",
+            "DarkRed",
+            "DarkMagenta",
+            "DarkYellow",
+            "Gray",
+            "DarkGray",
+            "Blue",
+            "Green",
+            "Cyan",
+            "Red",
+            "Magenta",
+            "Yellow",
+            "White")]
+        [Alias("ForegroundError")]
+        [string]
+        $ForegroundColorError = "Red",
+
+        [Parameter(ParameterSetName="ForegroundColorSpecific")]
+        [Parameter(ParameterSetName="BackgroundColorGlobal", Mandatory)]
+        [Parameter(ParameterSetName="BackgroundColorSpecific", Mandatory)]
+        [ValidateSet(
+            "Black",
+            "DarkBlue",
+            "DarkGreen",
+            "DarkCyan",
+            "DarkRed",
+            "DarkMagenta",
+            "DarkYellow",
+            "Gray",
+            "DarkGray",
+            "Blue",
+            "Green",
+            "Cyan",
+            "Red",
+            "Magenta",
+            "Yellow",
+            "White")]
+        [Alias("ForegroundWarning")]
+        [string]
+        $ForegroundColorWarning = "Yellow",
+
+        [Parameter(ParameterSetName="ForegroundColorSpecific")]
+        [Parameter(ParameterSetName="BackgroundColorGlobal", Mandatory)]
+        [Parameter(ParameterSetName="BackgroundColorSpecific", Mandatory)]
+        [ValidateSet(
+            "Black",
+            "DarkBlue",
+            "DarkGreen",
+            "DarkCyan",
+            "DarkRed",
+            "DarkMagenta",
+            "DarkYellow",
+            "Gray",
+            "DarkGray",
+            "Blue",
+            "Green",
+            "Cyan",
+            "Red",
+            "Magenta",
+            "Yellow",
+            "White")]
+        [Alias("ForegroundInfo")]
+        [string]
+        $ForegroundColorInfo,
+
+        [Parameter(ParameterSetName="ForegroundColorSpecific")]
+        [Parameter(ParameterSetName="BackgroundColorGlobal", Mandatory)]
+        [Parameter(ParameterSetName="BackgroundColorSpecific", Mandatory)]
+        [ValidateSet(
+            "Black",
+            "DarkBlue",
+            "DarkGreen",
+            "DarkCyan",
+            "DarkRed",
+            "DarkMagenta",
+            "DarkYellow",
+            "Gray",
+            "DarkGray",
+            "Blue",
+            "Green",
+            "Cyan",
+            "Red",
+            "Magenta",
+            "Yellow",
+            "White")]
+        [Alias("ForegroundDebug")]
+        [string]
+        $ForegroundColorDebug = "Gray",
+
         [Alias("Config")]
         [string]
         $ConfigFile
     )
-
-    # Colors can be imported from the config file.
-    [string]$ForegroundColorError    = $null
-    [string]$ForegroundColorWarning  = $null
-    [string]$ForegroundColorInfo     = $null
-    [string]$ForegroundColorDebug    = $null
-
-    [string]$BackgroundColorError   = $null
-    [string]$BackgroundColorWarning = $null
-    [string]$BackgroundColorInfo    = $null
-    [string]$BackgroundColorDebug   = $null
 
     # Allow module to inherit '-Verbose' flag.
     if (($PSCmdlet) -and (!($PSBoundParameters.ContainsKey('Verbose')))) {
@@ -1472,27 +1713,6 @@ function Start-Logging {
         }
     }
 
-    # Define console background colors.
-    if ($BackgroundColor) {
-        $Script:Config.BackgroundColor = $BackgroundColor
-    }
-    else {
-        $Colors = @{
-            $LOGLEVEL_ERROR   = $BackgroundColorError
-            $LOGLEVEL_WARNING = $BackgroundColorWarning
-            $LOGLEVEL_INFO    = $BackgroundColorInfo
-            $LOGLEVEL_DEBUG   = $BackgroundColorDebug
-        }
-
-        foreach ($key in $Colors.Keys) {
-            $color = $Colors[$key]
-
-            if ($color) {
-                $Script:BackgroundColors[$key] = $color
-            }
-        }
-    }
-
     # Define console foreground colors.
     if ($ForegroundColor) {
         # If a single color is specified, apply it to everything.
@@ -1511,6 +1731,27 @@ function Start-Logging {
 
             if ($color) {
                 $Script:ForegroundColors[$key] = $color
+            }
+        }
+    }
+
+    # Define console background colors.
+    if ($BackgroundColor) {
+        $Script:Config.BackgroundColor = $BackgroundColor
+    }
+    else {
+        $Colors = @{
+            $LOGLEVEL_ERROR   = $BackgroundColorError
+            $LOGLEVEL_WARNING = $BackgroundColorWarning
+            $LOGLEVEL_INFO    = $BackgroundColorInfo
+            $LOGLEVEL_DEBUG   = $BackgroundColorDebug
+        }
+
+        foreach ($key in $Colors.Keys) {
+            $color = $Colors[$key]
+
+            if ($color) {
+                $Script:BackgroundColors[$key] = $color
             }
         }
     }
@@ -2129,11 +2370,11 @@ function Write-LogException {
 
                 # Try getting error from the global $Errors object.
                 if ($err.Exception -and $err.Exception.Message) {
-                    $message = ($err.Exception.Message).Trim()
+                    $message = FormatError $err.Exception
                 }
                 # Or maybe it is an exception object already.
                 elseif ($err.Message) {
-                    $message = ($err.Exception.Message).Trim()
+                    $message = FormatError $err
                 }
                 # Forget it.
                 else {
@@ -2148,11 +2389,11 @@ function Write-LogException {
         else {
             # Try getting error from the global $Errors object.
             if ($Errors.Exception -and $Errors.Exception.Message) {
-                $message = ($Errors.Exception.Message).Trim()
+                $message = FormatError $Errors.Exception
             }
             # Or maybe it is an exception object already.
             elseif ($Errors.Message) {
-                $message = ($Errors.Exception.Message).Trim()
+                $message = FormatError $Errors
             }
             # Forget it.
             else {
